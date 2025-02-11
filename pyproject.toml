@@ -12,7 +12,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 description = "Quick test script for oml bimorph optimisation"
-dependencies = [] # Add project dependencies here, e.g. ["click", "numpy"]
+dependencies = ["dls-dodal @ git+https://github.com/DiamondLightSource/dodal.git@optics_metrology_lab", "bluesky", "event-model", "ophyd"] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
 readme = "README.md"
