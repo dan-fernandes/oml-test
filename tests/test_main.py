@@ -39,7 +39,7 @@ def detector():
 def csv_writer_subscriptions(tmp_path: pathlib.Path) -> tuple[Callable, Callable]:
     dir = pathlib.Path(tmp_path)
 
-    path_provider = csv_writer.get_static_path_provider(dir)
+    path_provider = csv_writer.get_static_path_provider(dir, "oml-test.csv")
 
     return csv_writer.csv_writer_subscription_builder(path_provider)
 
@@ -58,7 +58,7 @@ def test_1(tmp_path, csv_writer_subscriptions, detector, mirror, slits):
         },
     )
 
-    with open(tmp_path / "oml-test") as csv_file:
+    with open(tmp_path / "oml-test.csv") as csv_file:
         csv_string = csv_file.read()
 
     assert csv_string != ""
