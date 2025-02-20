@@ -32,7 +32,9 @@ def write_csv(csv_string: str, path_provider: PathProvider) -> None:
 
 
 def make_csv_string(
-    event_descriptor_docs: list[DocumentType], event_docs: list[DocumentType]
+    event_descriptor_docs: list[DocumentType],
+    event_docs: list[DocumentType],
+    metadata: dict[str, str],
 ) -> str:
     """
     Takes a list of RunEngine output docs and converts to CSV format
@@ -43,7 +45,7 @@ def make_csv_string(
     Returms:
         A string of given list's csv equivalent
     """
-    csv_dict = {"stream": []}
+    csv_dict = {"bimorph_position_index": []}
     headers = []
     streams = {}
 
@@ -53,16 +55,21 @@ def make_csv_string(
         headers.sort()
         for header in headers:
             csv_dict[header] = []
-        headers.insert(0, "stream")
+        headers.insert(0, "bimorph_position_index")
         streams[doc.get("uid")] = doc.get("name")
 
     for doc in event_docs:
         doc = cast(Event, doc)
         for header in doc["data"]:
             csv_dict[header].append(str(doc["data"][header]))
-        csv_dict["stream"].append(streams[doc.get("descriptor")])
+        csv_dict["bimorph_position_index"].append(streams[doc.get("descriptor")])
 
-    csv_str = ",".join(headers) + "\n"
+    csv_str = ""
+
+    for name, value in metadata.items():
+        csv_str += f"#{name} {value}\n"
+
+    csv_str += ",".join(headers) + "\n"
 
     csv_str += "\n".join(
         [
@@ -74,19 +81,28 @@ def make_csv_string(
     return csv_str
 
 
+def parse_metadata(metadata: dict[str, str], start_doc):
+    metadata["voltage_increment"] = str(start_doc["voltage_increment"])
+    metadata["dimension"] = start_doc["dimension"].value
+    metadata["slit_positions"] = str(start_doc["slit_positions"])
+    metadata["channels"] = str(start_doc["channels"])
+
+
 def csv_writer_subscription_builder(
     path_provider: PathProvider,
 ) -> Callable:
     event_descriptor_docs = []
     event_docs = []
+    metadata = {}
 
     def aggregate_docs(name, doc):
         if name == "descriptor":
             event_descriptor_docs.append(doc)
         elif name == "event":
             event_docs.append(doc)
-
-        csv_string = make_csv_string(event_descriptor_docs, event_docs)
+        elif name == "start":
+            parse_metadata(metadata, doc)
+        csv_string = make_csv_string(event_descriptor_docs, event_docs, metadata)
 
         write_csv(csv_string, path_provider)
 
