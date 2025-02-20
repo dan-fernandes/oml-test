@@ -82,10 +82,17 @@ def make_csv_string(
 
 
 def parse_metadata(metadata: dict[str, str], start_doc):
-    metadata["voltage_increment"] = str(start_doc["voltage_increment"])
-    metadata["dimension"] = start_doc["dimension"].value
-    metadata["slit_positions"] = str(start_doc["slit_positions"])
-    metadata["channels"] = str(start_doc["channels"])
+    if "voltage_increment" in start_doc.keys():
+        metadata["voltage_increment"] = str(start_doc["voltage_increment"])
+
+    if "dimension" in start_doc.keys():
+        metadata["dimension"] = start_doc["dimension"].value
+
+    if "slit_positions" in start_doc.keys():
+        metadata["slit_positions"] = str(start_doc["slit_positions"])
+
+    if "channels" in start_doc.keys():
+        metadata["channels"] = str(start_doc["channels"])
 
 
 def csv_writer_subscription_builder(
