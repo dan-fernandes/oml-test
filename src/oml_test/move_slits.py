@@ -19,9 +19,8 @@ dir = pathlib.Path("/tmp/")
 
 path_provider = csv_writer.get_static_path_provider(dir)
 
-descriptor_sub, event_sub = csv_writer.csv_writer_subscription_builder(path_provider)
+sub = csv_writer.csv_writer_subscription_builder(path_provider)
 
-RE.subscribe(descriptor_sub, "descriptor")
-RE.subscribe(event_sub, "event")
+RE.subscribe(sub)
 
 RE(scan(slits, 0.0, 1.0))

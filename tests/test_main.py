@@ -36,7 +36,7 @@ def detector():
 
 
 @pytest.fixture
-def csv_writer_subscriptions(tmp_path: pathlib.Path) -> tuple[Callable, Callable]:
+def csv_writer_subscription(tmp_path: pathlib.Path) -> Callable:
     dir = pathlib.Path(tmp_path)
 
     path_provider = csv_writer.get_static_path_provider(dir, "oml-test.csv")
@@ -44,7 +44,7 @@ def csv_writer_subscriptions(tmp_path: pathlib.Path) -> tuple[Callable, Callable
     return csv_writer.csv_writer_subscription_builder(path_provider)
 
 
-def test_1(tmp_path, csv_writer_subscriptions, detector, mirror, slits):
+def test_1(tmp_path, csv_writer_subscription, detector, mirror, slits):
     RE(
         bimorph_optimisation(
             [detector],
@@ -52,10 +52,7 @@ def test_1(tmp_path, csv_writer_subscriptions, detector, mirror, slits):
             slits,  # type: ignore
             *bimorph_config.config,
         ),
-        {
-            "descriptor": csv_writer_subscriptions[0],
-            "event": csv_writer_subscriptions[1],
-        },
+        csv_writer_subscription,
     )
 
     with open(tmp_path / "oml-test.csv") as csv_file:

@@ -76,20 +76,18 @@ def make_csv_string(
 
 def csv_writer_subscription_builder(
     path_provider: PathProvider,
-) -> tuple[Callable, Callable]:
+) -> Callable:
     event_descriptor_docs = []
     event_docs = []
 
-    def aggregate_event_descriptors(_, doc):
-        event_descriptor_docs.append(doc)
+    def aggregate_docs(name, doc):
+        if name == "descriptor":
+            event_descriptor_docs.append(doc)
+        elif name == "event":
+            event_docs.append(doc)
+
         csv_string = make_csv_string(event_descriptor_docs, event_docs)
 
         write_csv(csv_string, path_provider)
 
-    def aggregate_events(_, doc):
-        event_docs.append(doc)
-        csv_string = make_csv_string(event_descriptor_docs, event_docs)
-
-        write_csv(csv_string, path_provider)
-
-    return aggregate_event_descriptors, aggregate_events
+    return aggregate_docs
