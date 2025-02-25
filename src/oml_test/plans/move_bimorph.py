@@ -73,8 +73,11 @@ def plan(mirror):
     validate_bimorph_plan(original_voltage_list, voltage_increment, 1000, 500)
 
     # move to each bimorph position:
-    for i, channel in enumerate(mirror.channels.values()):
-        yield from bps.mv(channel, original_voltage_list[i] + voltage_increment)
+    for i in range(len(mirror.channels)):
+        yield from bps.mv(
+            mirror,  # type: ignore
+            {i + 1: original_voltage_list[i] + voltage_increment},  # type: ignore
+        )
         # sleep 10 seconds:
         yield from bps.sleep(10)
         print(
