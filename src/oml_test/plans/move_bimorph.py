@@ -4,7 +4,7 @@ from ophyd_async.core import init_devices
 
 from oml_test.runengine import RE
 
-with init_devices(mock=True):
+with init_devices():
     mirror = optics_metrology_lab.mirror_one()
 
 
