@@ -20,7 +20,7 @@ def cast_and_validate_path(directory_path: str) -> Path:
 
 
 def get_static_path_provider(directory_path: Path, filename: str | None = None):
-    filename = filename or "oml-test.csv" + datetime.now().strftime("%d-%m-%Y-%H-%M")
+    filename = filename or "oml-test-" + datetime.now().strftime("%d-%m-%Y-%H-%M" + ".csv")
     filename_provider = StaticFilenameProvider(filename)
     return StaticPathProvider(filename_provider, directory_path)
 
