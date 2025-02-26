@@ -20,7 +20,9 @@ def cast_and_validate_path(directory_path: str) -> Path:
 
 
 def get_static_path_provider(directory_path: Path, filename: str | None = None):
-    filename = filename or "oml-test-" + datetime.now().strftime("%d-%m-%Y-%H-%M" + ".csv")
+    filename = filename or "oml-test-" + datetime.now().strftime(
+        "%d-%m-%Y-%H-%M" + ".csv"
+    )
     filename_provider = StaticFilenameProvider(filename)
     return StaticPathProvider(filename_provider, directory_path)
 
@@ -32,6 +34,7 @@ def write_csv(csv_string: str, path_provider: PathProvider) -> None:
 
 
 def make_csv_string(
+    start_docs: list[DocumentType],
     event_descriptor_docs: list[DocumentType],
     event_docs: list[DocumentType],
     metadata: dict[str, str],
@@ -45,24 +48,35 @@ def make_csv_string(
     Returms:
         A string of given list's csv equivalent
     """
-    csv_dict = {"scan_index": []}
+    start_time = None
+    csv_dict = {"scan_index": [], "time": []}
     headers = []
     streams = {}
 
+    for doc in start_docs:
+        doc = cast(EventDescriptor, doc)
+        start_time = start_time or doc["time"]
+
     for doc in event_descriptor_docs:
         doc = cast(EventDescriptor, doc)
+
         headers = list(doc.get("data_keys"))
         headers.sort()
         for header in headers:
             csv_dict[header] = []
         headers.insert(0, "scan_index")
+        headers.insert(1, "time")
         streams[doc.get("uid")] = doc.get("name")
+
+    start_time = start_time or 0.0
 
     for doc in event_docs:
         doc = cast(Event, doc)
+
         for header in doc["data"]:
             csv_dict[header].append(str(doc["data"][header]))
         csv_dict["scan_index"].append(streams[doc.get("descriptor")])
+        csv_dict["time"].append(str(doc["time"] - start_time))
 
     csv_str = ""
 
@@ -98,6 +112,7 @@ def parse_metadata(metadata: dict[str, str], start_doc):
 def csv_writer_subscription_builder(
     path_provider: PathProvider,
 ) -> Callable:
+    start_docs = []
     event_descriptor_docs = []
     event_docs = []
     metadata = {}
@@ -109,7 +124,10 @@ def csv_writer_subscription_builder(
             event_docs.append(doc)
         elif name == "start":
             parse_metadata(metadata, doc)
-        csv_string = make_csv_string(event_descriptor_docs, event_docs, metadata)
+            start_docs.append(doc)
+        csv_string = make_csv_string(
+            start_docs, event_descriptor_docs, event_docs, metadata
+        )
 
         write_csv(csv_string, path_provider)
 
