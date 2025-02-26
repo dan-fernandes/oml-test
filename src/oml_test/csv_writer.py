@@ -45,7 +45,7 @@ def make_csv_string(
     Returms:
         A string of given list's csv equivalent
     """
-    csv_dict = {"bimorph_position_index": []}
+    csv_dict = {"scan_index": []}
     headers = []
     streams = {}
 
@@ -55,14 +55,14 @@ def make_csv_string(
         headers.sort()
         for header in headers:
             csv_dict[header] = []
-        headers.insert(0, "bimorph_position_index")
+        headers.insert(0, "scan_index")
         streams[doc.get("uid")] = doc.get("name")
 
     for doc in event_docs:
         doc = cast(Event, doc)
         for header in doc["data"]:
             csv_dict[header].append(str(doc["data"][header]))
-        csv_dict["bimorph_position_index"].append(streams[doc.get("descriptor")])
+        csv_dict["scan_index"].append(streams[doc.get("descriptor")])
 
     csv_str = ""
 
