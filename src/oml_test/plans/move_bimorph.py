@@ -66,29 +66,29 @@ def plan(mirror):
 
     # get start position:
     original_voltage_list = []
+
     for channel in mirror.channels.values():
         position = yield from bps.rd(channel.output_voltage)
         original_voltage_list.append(position)
+
+    current_voltage_list = original_voltage_list.copy()
 
     validate_bimorph_plan(original_voltage_list, voltage_increment, 1000, 500)
 
     # move to each bimorph position:
     for i in range(len(mirror.channels)):
-        yield from bps.mv(
-            mirror,  # type: ignore
-            {i + 1: original_voltage_list[i] + voltage_increment},  # type: ignore
+        current_voltage_list[i] += voltage_increment
+        yield from bps.mv(mirror, current_voltage_list
         )
         # sleep 10 seconds:
+        print("Sleeping...")
         yield from bps.sleep(10)
         print(
             f"In position {[voltage + (voltage_increment * (j <= i)) for j, voltage in enumerate(original_voltage_list)]}"  # noqa: E501
         )
 
     # return to start position:
-    for value, channel in zip(
-        original_voltage_list, mirror.channels.values(), strict=True
-    ):
-        yield from bps.mv(channel, value)  # type: ignore
+    yield from bps.mv(mirror, original_voltage_list)
 
 
 RE(plan(mirror))

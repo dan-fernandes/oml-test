@@ -14,7 +14,7 @@ def plan(slits):
     slits_start_gap = yield from bps.rd(slits.x_gap)
     slits_start_centre = yield from bps.rd(slits.x_centre)
 
-    for value in linspace(0.0, 100.0, 200):
+    for value in linspace(-167.0, -285.0, 10):
         yield from move_slits(slits, SlitDimension.X, 0.25, value)
 
     yield from move_slits(slits, SlitDimension.X, slits_start_gap, slits_start_centre)
